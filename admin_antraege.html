@@ -1,0 +1,390 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartZeit - Anträge</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'neuer_bericht' %}" class="nav-item">Neuer Bericht</a>
+            <a href="{% url 'zeituebersicht' %}" class="nav-item">Zeitübersicht</a>
+            
+            {% if user.role == 'vip' %}
+                <div class="nav-section">VIP</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+            {% endif %}
+            
+            {% if user.role == 'admin' %}
+                <div class="nav-section">Administration</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+                <a href="{% url 'admin_benutzerverwaltung' %}" class="nav-item">Benutzerverwaltung</a>
+                <a href="{% url 'admin_antraege' %}" class="nav-item">Anträge</a>
+                <a href="{% url 'admin_modulverwaltung' %}" class="nav-item">Modulverwaltung</a>
+            {% endif %}
+            
+            <div class="nav-section">Konto</div>
+            
+            {% if user.role == 'user' %}
+                <a href="{% url 'vip_werden' %}" class="nav-item">VIP werden</a>
+            {% endif %}
+            
+            {% if user.role == 'vip' %}
+                <a href="{% url 'administrator_werden' %}" class="nav-item">Administrator werden</a>
+            {% endif %}
+            
+            <a href="{% url 'profil' %}" class="nav-item">Profil</a>
+        </nav>
+        
+        <div class="benutzer-section">
+            <div class="benutzer-info">
+                <div class="benutzer-avatar">{{ user.initials }}</div>
+                <div class="benutzer-details">
+                    <div class="benutzer-name">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="benutzer-role">
+                        {% if user.role == 'admin' %}Administrator
+                        {% elif user.role == 'vip' %}VIP Anwender
+                        {% else %}Einfacher Anwender{% endif %}
+                    </div>
+                </div>
+            </div>
+            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+        </div>
+    </div>
+
+    <main class="hauptinhalt">
+        <div class="header">
+            <h1>Anträge verwalten</h1>
+            <p>Genehmigen oder ablehnen Sie VIP- und Administrator-Anträge</p>
+        </div>
+
+        {% if pending_vip %}
+        <details class="antraege-sektion" open>
+            <summary class="antraege-header">
+                <h2 class="antraege-titel">Offene VIP-Anträge</h2>
+                <div class="antraege-header-right">
+                    <span class="antraege-anzahl">{{ anzahl_pending_vip }}</span>
+                    <div class="kategorie-toggle">▼</div>
+                </div>
+            </summary>
+            
+            <div class="requests-list">
+                {% for antrag in pending_vip %}
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-user">
+                            <div class="user-avatar-large">
+                                {{ antrag.firstname.0|upper }}{{ antrag.lastname.0|upper }}
+                            </div>
+                            <div class="request-user-info">
+                                <h3>{{ antrag.firstname }} {{ antrag.lastname }}</h3>
+                                <p>{{ antrag.email }}</p>
+                            </div>
+                        </div>
+                        <div class="request-header-right">
+                            <span class="request-type">VIP ANTRAG</span>
+                        </div>
+                    </div>
+                    
+                    <div class="request-body">
+                        <div class="request-label">Begründung</div>
+                        <div class="request-reason">
+                            {{ antrag.begruendung }}
+                        </div>
+                        
+                        <div class="request-meta">
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Eingereicht am</span>
+                                <span>{{ antrag.erstellt_am }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="request-actions">
+                            <button class="btn-approve" onclick="window.location.href='{% url 'antrag_genehmigen' antrag.username %}'">Genehmigen</button>
+                            <button class="btn-reject" onclick="window.location.href='{% url 'antrag_ablehnen' antrag.username %}'">Ablehnen</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+
+        {% if pending_admin %}
+        <details class="antraege-sektion" open>
+            <summary class="antraege-header">
+                <h2 class="antraege-titel">Offene Administrator-Anträge</h2>
+                <div class="antraege-header-right">
+                    <span class="antraege-anzahl">{{ anzahl_pending_admin }}</span>
+                    <div class="kategorie-toggle">▼</div>
+                </div>
+            </summary>
+            
+            <div class="requests-list">
+                {% for antrag in pending_admin %}
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-user">
+                            <div class="user-avatar-large">
+                                {{ antrag.firstname.0|upper }}{{ antrag.lastname.0|upper }}
+                            </div>
+                            <div class="request-user-info">
+                                <h3>{{ antrag.firstname }} {{ antrag.lastname }}</h3>
+                                <p>{{ antrag.email }}</p>
+                            </div>
+                        </div>
+                        <div class="request-header-right">
+                            <span class="request-type" style="background: #9b59b6;">ADMIN ANTRAG</span>
+                        </div>
+                    </div>
+                    
+                    <div class="request-body">
+                        <div class="request-label">Begründung</div>
+                        <div class="request-reason">
+                            {{ antrag.begruendung }}
+                        </div>
+                        
+                        <div class="request-meta">
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Eingereicht am</span>
+                                <span>{{ antrag.erstellt_am }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="request-actions">
+                            <button class="btn-approve" onclick="window.location.href='{% url 'antrag_genehmigen' antrag.username %}'">Genehmigen</button>
+                            <button class="btn-reject" onclick="window.location.href='{% url 'antrag_ablehnen' antrag.username %}'">Ablehnen</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+
+        {% if not pending_vip and not pending_admin %}
+        <div class="keine-antraege">
+            <p>Keine offenen Anträge vorhanden.</p>
+        </div>
+        {% endif %}
+
+        {% if approved_vip %}
+        <details class="antraege-sektion">
+            <summary class="antraege-header">
+                <h2 class="antraege-titel">Genehmigte VIP-Anträge</h2>
+                <div class="antraege-header-right">
+                    <span class="antraege-anzahl">{{ approved_vip|length }}</span>
+                    <div class="kategorie-toggle">▼</div>
+                </div>
+            </summary>
+            
+            <div class="requests-list">
+                {% for antrag in approved_vip %}
+                <div class="request-card genehmigt">
+                    <div class="request-header">
+                        <div class="request-user">
+                            <div class="user-avatar-large">
+                                {{ antrag.firstname.0|upper }}{{ antrag.lastname.0|upper }}
+                            </div>
+                            <div class="request-user-info">
+                                <h3>{{ antrag.firstname }} {{ antrag.lastname }}</h3>
+                                <p>{{ antrag.email }}</p>
+                            </div>
+                        </div>
+                        <div class="request-header-right">
+                            <span class="request-type">VIP ANTRAG</span>
+                            <span class="request-status genehmigt">✓ GENEHMIGT</span>
+                        </div>
+                    </div>
+                    
+                    <div class="request-body">
+                        <div class="request-label">Begründung</div>
+                        <div class="request-reason">
+                            {{ antrag.begruendung }}
+                        </div>
+                        
+                        <div class="request-meta">
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Genehmigt am</span>
+                                <span>{{ antrag.bearbeitet_am }}</span>
+                            </div>
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Genehmigt von</span>
+                                <span>{{ antrag.bearbeitet_von }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+
+        {% if approved_admin %}
+        <details class="antraege-sektion">
+            <summary class="antraege-header">
+                <h2 class="antraege-titel">Genehmigte Administrator-Anträge</h2>
+                <div class="antraege-header-right">
+                    <span class="antraege-anzahl">{{ approved_admin|length }}</span>
+                    <div class="kategorie-toggle">▼</div>
+                </div>
+            </summary>
+            
+            <div class="requests-list">
+                {% for antrag in approved_admin %}
+                <div class="request-card genehmigt">
+                    <div class="request-header">
+                        <div class="request-user">
+                            <div class="user-avatar-large">
+                                {{ antrag.firstname.0|upper }}{{ antrag.lastname.0|upper }}
+                            </div>
+                            <div class="request-user-info">
+                                <h3>{{ antrag.firstname }} {{ antrag.lastname }}</h3>
+                                <p>{{ antrag.email }}</p>
+                            </div>
+                        </div>
+                        <div class="request-header-right">
+                            <span class="request-type" style="background: #9b59b6;">ADMIN ANTRAG</span>
+                            <span class="request-status genehmigt">✓ GENEHMIGT</span>
+                        </div>
+                    </div>
+                    
+                    <div class="request-body">
+                        <div class="request-label">Begründung</div>
+                        <div class="request-reason">
+                            {{ antrag.begruendung }}
+                        </div>
+                        
+                        <div class="request-meta">
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Genehmigt am</span>
+                                <span>{{ antrag.bearbeitet_am }}</span>
+                            </div>
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Genehmigt von</span>
+                                <span>{{ antrag.bearbeitet_von }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+
+        {% if rejected_vip %}
+        <details class="antraege-sektion">
+            <summary class="antraege-header">
+                <h2 class="antraege-titel">Abgelehnte VIP-Anträge</h2>
+                <div class="antraege-header-right">
+                    <span class="antraege-anzahl">{{ rejected_vip|length }}</span>
+                    <div class="kategorie-toggle">▼</div>
+                </div>
+            </summary>
+            
+            <div class="requests-list">
+                {% for antrag in rejected_vip %}
+                <div class="request-card abgelehnt">
+                    <div class="request-header">
+                        <div class="request-user">
+                            <div class="user-avatar-large">
+                                {{ antrag.firstname.0|upper }}{{ antrag.lastname.0|upper }}
+                            </div>
+                            <div class="request-user-info">
+                                <h3>{{ antrag.firstname }} {{ antrag.lastname }}</h3>
+                                <p>{{ antrag.email }}</p>
+                            </div>
+                        </div>
+                        <div class="request-header-right">
+                            <span class="request-type">VIP ANTRAG</span>
+                            <span class="request-status abgelehnt">✗ ABGELEHNT</span>
+                        </div>
+                    </div>
+                    
+                    <div class="request-body">
+                        <div class="request-label">Begründung</div>
+                        <div class="request-reason">
+                            {{ antrag.begruendung }}
+                        </div>
+                        
+                        <div class="request-meta">
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Abgelehnt am</span>
+                                <span>{{ antrag.bearbeitet_am }}</span>
+                            </div>
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Abgelehnt von</span>
+                                <span>{{ antrag.bearbeitet_von }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+
+        {% if rejected_admin %}
+        <details class="antraege-sektion">
+            <summary class="antraege-header">
+                <h2 class="antraege-titel">Abgelehnte Administrator-Anträge</h2>
+                <div class="antraege-header-right">
+                    <span class="antraege-anzahl">{{ rejected_admin|length }}</span>
+                    <div class="kategorie-toggle">▼</div>
+                </div>
+            </summary>
+            
+            <div class="requests-list">
+                {% for antrag in rejected_admin %}
+                <div class="request-card abgelehnt">
+                    <div class="request-header">
+                        <div class="request-user">
+                            <div class="user-avatar-large">
+                                {{ antrag.firstname.0|upper }}{{ antrag.lastname.0|upper }}
+                            </div>
+                            <div class="request-user-info">
+                                <h3>{{ antrag.firstname }} {{ antrag.lastname }}</h3>
+                                <p>{{ antrag.email }}</p>
+                            </div>
+                        </div>
+                        <div class="request-header-right">
+                            <span class="request-type" style="background: #9b59b6;">ADMIN ANTRAG</span>
+                            <span class="request-status abgelehnt">✗ ABGELEHNT</span>
+                        </div>
+                    </div>
+                    
+                    <div class="request-body">
+                        <div class="request-label">Begründung</div>
+                        <div class="request-reason">
+                            {{ antrag.begruendung }}
+                        </div>
+                        
+                        <div class="request-meta">
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Abgelehnt am</span>
+                                <span>{{ antrag.bearbeitet_am }}</span>
+                            </div>
+                            <div class="request-meta-item">
+                                <span class="request-meta-label">Abgelehnt von</span>
+                                <span>{{ antrag.bearbeitet_von }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+    </main>
+
+</body>
+</html>

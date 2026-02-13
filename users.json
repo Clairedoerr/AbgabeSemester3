@@ -1,0 +1,49 @@
+{
+  "claire.doerr": {
+    "firstname": "Claire",
+    "lastname": "Dörr",
+    "email": "claire.doerr@t-online.de",
+    "password": "12345678",
+    "role": "admin",
+    "created_at": "2025-11-12"
+  },
+  "kristinabaotic": {
+    "firstname": "Kristina",
+    "lastname": "Baotic",
+    "email": "kristinabaotic@gamil.com",
+    "password": "12345678",
+    "role": "user",
+    "created_at": "2025-11-13"
+  },
+  "test": {
+    "firstname": "test",
+    "lastname": "test",
+    "email": "test@test.de",
+    "password": "12345678",
+    "role": "vip",
+    "created_at": "2025-11-14"
+  },
+  "kristinabaotic2000": {
+    "firstname": "Kristina",
+    "lastname": "Baotic",
+    "email": "kristinabaotic2000@gmail.com",
+    "password": "kristinabaotic123",
+    "role": "user",
+    "created_at": "2025-11-17"
+  },
+  "anabaotic": {
+    "firstname": "Ana",
+    "lastname": "Baotic",
+    "email": "anabaotic@gmail.com",
+    "password": "anabaotic1234",
+    "role": "user",
+    "created_at": "2025-11-24"
+  },
+  "claire": {
+    "firstname": "Claire",
+    "lastname": "TEst",
+    "email": "claire@test.de",
+    "password": "123",
+    "role": "user"
+  }
+}

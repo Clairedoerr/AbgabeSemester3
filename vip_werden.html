@@ -1,0 +1,111 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>VIP-werden</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'neuer_bericht' %}" class="nav-item">Neuer Bericht</a>
+            <a href="{% url 'zeituebersicht' %}" class="nav-item">Zeitübersicht</a>
+            
+            {% if user.role == 'vip' %}
+                <div class="nav-section">VIP</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+            {% endif %}
+            
+            {% if user.role == 'admin' %}
+                <div class="nav-section">Administration</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+                <a href="{% url 'admin_benutzerverwaltung' %}" class="nav-item">Benutzerverwaltung</a>
+                <a href="{% url 'admin_antraege' %}" class="nav-item">Anträge</a>
+                <a href="{% url 'admin_modulverwaltung' %}" class="nav-item">Modulverwaltung</a>
+            {% endif %}
+            
+            <div class="nav-section">Konto</div>
+            
+            {% if user.role == 'user' %}
+                <a href="{% url 'vip_werden' %}" class="nav-item">VIP werden</a>
+            {% endif %}
+            
+            {% if user.role == 'vip' %}
+                <a href="{% url 'administrator_werden' %}" class="nav-item">Administrator werden</a>
+            {% endif %}
+            
+            <a href="{% url 'profil' %}" class="nav-item">Profil</a>
+        </nav>
+        
+        <div class="benutzer-section">
+            <div class="benutzer-info">
+                <div class="benutzer-avatar">{{ user.initials }}</div>
+                <div class="benutzer-details">
+                    <div class="benutzer-name">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="benutzer-role">
+                        {% if user.role == 'admin' %}Administrator
+                        {% elif user.role == 'vip' %}VIP Anwender
+                        {% else %}Einfacher Anwender{% endif %}
+                    </div>
+                </div>
+            </div>
+            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+        </div>
+    </div>
+
+    <main class="hauptinhalt">
+        <div class="header">
+            <h1>VIP-Mitgliedschaft</h1>
+            <p>Erweitern Sie Ihre Möglichkeiten mit erweiterten Funktionen</p>
+        </div>
+
+        <div class="inhaltsbereich-VIP">
+
+            <div class="formular-bereich-VIP">
+                <h2>VIP-Antrag stellen</h2>
+                
+                {% if error %}
+                <div style="background: #fee; border: 1px solid #c00; padding: 15px; margin-bottom: 20px; border-radius: 5px; color: #c00;">
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                {% if offener_antrag %}
+                <div style="background: #fef9e7; border: 1px solid #f39c12; padding: 20px; margin-bottom: 20px; border-radius: 5px;">
+                    <h3 style="margin-top: 0; color: #f39c12;">Ihr Antrag wurde eingereicht</h3>
+                    <p><strong>Status:</strong> Wird bearbeitet</p>
+                    <p><strong>Eingereicht am:</strong> {{ offener_antrag.erstellt_am }}</p>
+                    <p><strong>Ihre Begründung:</strong><br>{{ offener_antrag.begruendung }}</p>
+                    <p style="margin-bottom: 0; color: #7f8c8d;">Bitte warten Sie, bis ein Administrator Ihren Antrag bearbeitet hat.</p>
+                </div>
+                {% else %}
+
+                <form method="POST" action="{% url 'vip_werden' %}">
+                    {% csrf_token %}
+                    
+                    <div class="formular-gruppe-VIP">
+                        <label for="begruendung">Begründung für VIP-Status</label>
+                        <textarea id="begruendung" name="begruendung" required placeholder="Bitte beschreiben Sie, warum Sie VIP-Anwender werden möchten..."></textarea>
+                        <p class="eingabe-hinweis-VIP">Erklären Sie kurz, wie Sie die erweiterten Funktionen nutzen möchten</p>
+                    </div>
+
+                    <div class="formular-aktionen-VIP">
+                        <button type="submit" class="button-haupt-VIP">Antrag einreichen</button>
+                        <a href="{% url 'dashboard' %}" class="button-zweit-VIP" role="button">Abbrechen</a>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

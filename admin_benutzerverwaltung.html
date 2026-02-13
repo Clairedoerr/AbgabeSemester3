@@ -1,0 +1,152 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartZeit - Benutzerverwaltung</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+    
+    <script>
+    function loescheBenutzer(username, name) {
+        if (confirm('Benutzer "' + name + '" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) {
+            window.location.href = '/benutzer_loeschen/' + username + '/';
+        }
+    }
+    </script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'neuer_bericht' %}" class="nav-item">Neuer Bericht</a>
+            <a href="{% url 'zeituebersicht' %}" class="nav-item">Zeitübersicht</a>
+            
+            {% if user.role == 'vip' %}
+                <div class="nav-section">VIP</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+            {% endif %}
+            
+            {% if user.role == 'admin' %}
+                <div class="nav-section">Administration</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+                <a href="{% url 'admin_benutzerverwaltung' %}" class="nav-item">Benutzerverwaltung</a>
+                <a href="{% url 'admin_antraege' %}" class="nav-item">Anträge</a>
+                <a href="{% url 'admin_modulverwaltung' %}" class="nav-item">Modulverwaltung</a>
+            {% endif %}
+            
+            <div class="nav-section">Konto</div>
+            
+            {% if user.role == 'user' %}
+                <a href="{% url 'vip_werden' %}" class="nav-item">VIP werden</a>
+            {% endif %}
+            
+            {% if user.role == 'vip' %}
+                <a href="{% url 'administrator_werden' %}" class="nav-item">Administrator werden</a>
+            {% endif %}
+            
+            <a href="{% url 'profil' %}" class="nav-item">Profil</a>
+        </nav>
+        
+        <div class="benutzer-section">
+            <div class="benutzer-info">
+                <div class="benutzer-avatar">{{ user.initials }}</div>
+                <div class="benutzer-details">
+                    <div class="benutzer-name">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="benutzer-role">
+                        {% if user.role == 'admin' %}Administrator
+                        {% elif user.role == 'vip' %}VIP Anwender
+                        {% else %}Einfacher Anwender{% endif %}
+                    </div>
+                </div>
+            </div>
+            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+        </div>
+    </div>
+
+    <main class="hauptinhalt">
+        <div class="header">
+            <h1>Benutzerverwaltung</h1>
+            <p>Verwalten Sie Benutzer und deren Berechtigungen</p>
+        </div>
+
+        <div class="raster">
+            <div class="statistik-karte">
+                <div class="label">Gesamt Benutzer</div>
+                <div class="wert-dashboard">{{ anzahl_gesamt }}</div>
+            </div>
+
+            <div class="statistik-karte">
+                <div class="label">Administratoren</div>
+                <div class="wert-dashboard">{{ anzahl_admin }}</div>
+            </div>
+
+            <div class="statistik-karte">
+                <div class="label">VIP Benutzer</div>
+                <div class="wert-dashboard">{{ anzahl_vip }}</div>
+            </div>
+
+            <div class="statistik-karte">
+                <div class="label">Einfache Benutzer</div>
+                <div class="wert-dashboard">{{ anzahl_user }}</div>
+            </div>
+        </div>
+
+        <div class="benutzer-tabelle">
+            <div class="table-header">
+                <h2>Alle Benutzer</h2>
+            </div>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Benutzer</th>
+                    <th>E-Mail</th>
+                    <th>Rolle</th>
+                    <th>Registriert</th>
+                    <th>Aktionen</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for benutzer in user_liste %}
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar-small">{{ benutzer.initials }}</div>
+                            <div>{{ benutzer.firstname }} {{ benutzer.lastname }}</div>
+                        </div>
+                    </td>
+                    <td>{{ benutzer.email }}</td>
+                    <td>
+                        {% if benutzer.role == 'admin' %}
+                            <span class="role-badge role-admin">Administrator</span>
+                        {% elif benutzer.role == 'vip' %}
+                            <span class="role-badge role-vip">VIP Anwender</span>
+                        {% else %}
+                            <span class="role-badge role-user">Einfacher Anwender</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ benutzer.created_at }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button 
+                                class="btn-action btn-block" 
+                                onclick="loescheBenutzer('{{ benutzer.username }}', '{{ benutzer.firstname }} {{ benutzer.lastname }}')">
+                                Löschen
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</body>
+</html>

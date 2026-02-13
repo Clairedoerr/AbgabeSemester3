@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil - SmartZeit</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'neuer_bericht' %}" class="nav-item">Neuer Bericht</a>
+            <a href="{% url 'zeituebersicht' %}" class="nav-item">Zeitübersicht</a>
+            
+            {% if user.role == 'vip' %}
+                <div class="nav-section">VIP</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+            {% endif %}
+            
+            {% if user.role == 'admin' %}
+                <div class="nav-section">Administration</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+                <a href="{% url 'admin_benutzerverwaltung' %}" class="nav-item">Benutzerverwaltung</a>
+                <a href="{% url 'admin_antraege' %}" class="nav-item">Anträge</a>
+                <a href="{% url 'admin_modulverwaltung' %}" class="nav-item">Modulverwaltung</a>
+            {% endif %}
+            
+            <div class="nav-section">Konto</div>
+            
+            {% if user.role == 'user' %}
+                <a href="{% url 'vip_werden' %}" class="nav-item">VIP werden</a>
+            {% endif %}
+            
+            {% if user.role == 'vip' %}
+                <a href="{% url 'administrator_werden' %}" class="nav-item">Administrator werden</a>
+            {% endif %}
+            
+            <a href="{% url 'profil' %}" class="nav-item">Profil</a>
+        </nav>
+        
+        <div class="benutzer-section">
+            <div class="benutzer-info">
+                <div class="benutzer-avatar">{{ user.initials }}</div>
+                <div class="benutzer-details">
+                    <div class="benutzer-name">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="benutzer-role">
+                        {% if user.role == 'admin' %}Administrator
+                        {% elif user.role == 'vip' %}VIP Anwender
+                        {% else %}Einfacher Anwender{% endif %}
+                    </div>
+                </div>
+            </div>
+            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+        </div>
+    </div>
+
+    <main class="hauptinhalt">
+        <div class="header">
+            <h1>Profil & Einstellungen</h1>
+            <p>Verwalten Sie Ihre persönlichen Daten und Einstellungen</p>
+        </div>
+
+        {% if success %}
+        <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid #c3e6cb;">
+            <strong>✓ Erfolgreich!</strong> Ihre Änderungen wurden gespeichert.
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid #f5c6cb;">
+            <strong>Fehler:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="profil-container">
+            <div class="profil-kopf">
+                <div class="avatar-gross-profil">{{ user.initials }}</div>
+                <div class="profil-info">
+                    <h2>{{ user.firstname }} {{ user.lastname }}</h2>
+                    <div class="profil-meta">
+                        <span>{{ user.email }}</span>
+                        <span>
+                            {% if user.role == 'admin' %}Administrator
+                            {% elif user.role == 'vip' %}VIP Anwender
+                            {% else %}Einfacher Anwender{% endif %}
+                        </span>
+                        <span>Mitglied seit {{ user.created_at }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="abschnitt-karte-profil">
+                <h3 class="abschnitt-titel-profil">Persönliche Informationen</h3>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="personal_info">
+                    
+                    <div class="formular-zeile-profil">
+                        <div class="formular-gruppe-profil">
+                            <label for="firstname">Vorname</label>
+                            <input type="text" id="firstname" name="firstname" value="{{ user.firstname }}" required>
+                        </div>
+                        <div class="formular-gruppe-profil">
+                            <label for="lastname">Nachname</label>
+                            <input type="text" id="lastname" name="lastname" value="{{ user.lastname }}" required>
+                        </div>
+                    </div>
+                    <div class="formular-gruppe-profil">
+                        <label for="email">E-Mail-Adresse</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <div class="formular-aktionen-profil">
+                        <button type="submit" class="button-primär-profil">Änderungen speichern</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="abschnitt-karte-profil">
+                <h3 class="abschnitt-titel-profil">Passwort ändern</h3>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="change_password">
+                    
+                    <div class="formular-gruppe-profil">
+                        <label for="current-password">Aktuelles Passwort</label>
+                        <input type="password" id="current-password" name="current-password" required>
+                    </div>
+                    <div class="formular-zeile-profil">
+                        <div class="formular-gruppe-profil">
+                            <label for="new-password">Neues Passwort</label>
+                            <input type="password" id="new-password" name="new-password" minlength="8" required>
+                        </div>
+                        <div class="formular-gruppe-profil">
+                            <label for="password-confirm">Passwort bestätigen</label>
+                            <input type="password" id="password-confirm" name="password-confirm" required>
+                        </div>
+                    </div>
+                    <div class="formular-aktionen-profil">
+                        <button type="submit" class="button-primär-profil">Passwort ändern</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="abschnitt-karte-profil">
+                <h3 class="abschnitt-titel-profil">Datenschutz & Sicherheit</h3>
+                <div class="gefahrenzone-profil">
+                    <h4>Konto löschen</h4>
+                    <p>Das Löschen Ihres Kontos ist permanent und kann nicht rückgängig gemacht werden. Alle Ihre Daten werden unwiderruflich gelöscht.</p>
+                    <form method="POST" onsubmit="return confirm('Sind Sie sicher, dass Sie Ihr Konto löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden!');">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="delete_account">
+                        <button type="submit" class="button-gefahr-profil">Konto dauerhaft löschen</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    
+</body>
+</html>

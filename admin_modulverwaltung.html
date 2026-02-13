@@ -1,0 +1,156 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartZeit - Modulverwaltung</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+
+    <script>
+    function loescheModul(modulId, modulName) {
+        if (confirm('Modul "' + modulName + '" wirklich löschen?')) {
+            window.location.href = '/modul_loeschen/' + modulId + '/';
+        }
+    }
+    </script>
+
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'neuer_bericht' %}" class="nav-item">Neuer Bericht</a>
+            <a href="{% url 'zeituebersicht' %}" class="nav-item">Zeitübersicht</a>
+            
+            {% if user.role == 'vip' %}
+                <div class="nav-section">VIP</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+            {% endif %}
+            
+            {% if user.role == 'admin' %}
+                <div class="nav-section">Administration</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+                <a href="{% url 'admin_benutzerverwaltung' %}" class="nav-item">Benutzerverwaltung</a>
+                <a href="{% url 'admin_antraege' %}" class="nav-item">Anträge</a>
+                <a href="{% url 'admin_modulverwaltung' %}" class="nav-item">Modulverwaltung</a>
+            {% endif %}
+            
+            <div class="nav-section">Konto</div>
+            
+            {% if user.role == 'user' %}
+                <a href="{% url 'vip_werden' %}" class="nav-item">VIP werden</a>
+            {% endif %}
+            
+            {% if user.role == 'vip' %}
+                <a href="{% url 'administrator_werden' %}" class="nav-item">Administrator werden</a>
+            {% endif %}
+            
+            <a href="{% url 'profil' %}" class="nav-item">Profil</a>
+        </nav>
+        
+        <div class="benutzer-section">
+            <div class="benutzer-info">
+                <div class="benutzer-avatar">{{ user.initials }}</div>
+                <div class="benutzer-details">
+                    <div class="benutzer-name">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="benutzer-role">
+                        {% if user.role == 'admin' %}Administrator
+                        {% elif user.role == 'vip' %}VIP Anwender
+                        {% else %}Einfacher Anwender{% endif %}
+                    </div>
+                </div>
+            </div>
+            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+        </div>
+    </div>
+
+    <main class="hauptinhalt">
+        <div class="header">
+            <h1>Modulverwaltung</h1>
+            <p>Erstellen und verwalten Sie Arbeitsmodule</p>
+        </div>
+
+        <div class="formular-bereich" style="background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0;">Neues Modul erstellen</h2>
+            
+            <form method="POST" action="{% url 'modul_erstellen' %}">
+                {% csrf_token %}
+                
+                <div class="formular-gruppe" style="margin-bottom: 20px;">
+                    <label for="name" style="display: block; margin-bottom: 8px; font-weight: 500;">Modulname <span style="color: red;">*</span></label>
+                    <input type="text" id="name" name="name" required placeholder="z.B. Frontend Development" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <div class="formular-gruppe" style="margin-bottom: 20px;">
+                    <label for="beschreibung" style="display: block; margin-bottom: 8px; font-weight: 500;">Beschreibung</label>
+                    <textarea id="beschreibung" name="beschreibung" placeholder="Beschreiben Sie das Modul..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;"></textarea>
+                </div>
+
+                <div class="formular-aktionen">
+                    <button type="submit" class="button-haupt" style="background: #17a2b8; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;">Modul erstellen</button>
+                </div>
+            </form>
+        </div>
+
+        <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0;">Vorhandene Module</h2>
+            
+            {% if module %}
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                        <th style="padding: 15px; text-align: left; font-weight: 600; color: #495057;">Modulname</th>
+                        <th style="padding: 15px; text-align: left; font-weight: 600; color: #495057;">Beschreibung</th>
+                        <th style="padding: 15px; text-align: left; font-weight: 600; color: #495057;">Erstellt von</th>
+                        <th style="padding: 15px; text-align: left; font-weight: 600; color: #495057;">Erstellt am</th>
+                        <th style="padding: 15px; text-align: center; font-weight: 600; color: #495057; width: 120px;">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for modul in module %}
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 15px; font-weight: 500; color: #212529;">{{ modul.name }}</td>
+                        <td style="padding: 15px; color: #6c757d;">
+                            {% if modul.beschreibung %}
+                                {{ modul.beschreibung }}
+                            {% else %}
+                                <em style="color: #adb5bd;">Keine Beschreibung</em>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px; color: #6c757d;">{{ modul.erstellt_von }}</td>
+                        <td style="padding: 15px; color: #6c757d;">
+                            {% if modul.erstellt_am %}
+                                {{ modul.erstellt_am|slice:":10" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <button 
+                                onclick="loescheModul('{{ modul.id }}', '{{ modul.name }}')"
+                                style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                Löschen
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="background: #f8f9fa; padding: 40px; text-align: center; border-radius: 8px; color: #6c757d; margin-top: 20px;">
+                <p style="font-size: 16px; margin: 0;">Noch keine Module vorhanden. Erstellen Sie Ihr erstes Modul oben im Formular.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </main>
+
+</body>
+</html>

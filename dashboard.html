@@ -1,0 +1,101 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'neuer_bericht' %}" class="nav-item">Neuer Bericht</a>
+            <a href="{% url 'zeituebersicht' %}" class="nav-item">Zeitübersicht</a>
+
+            {% if user.role == 'vip' %}
+                <div class="nav-section">VIP</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+            {% endif %}
+            
+            {% if user.role == 'admin' %}
+                <div class="nav-section">Administration</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+                <a href="{% url 'admin_benutzerverwaltung' %}" class="nav-item">Benutzerverwaltung</a>
+                <a href="{% url 'admin_antraege' %}" class="nav-item">Anträge</a>
+                <a href="{% url 'admin_modulverwaltung' %}" class="nav-item">Modulverwaltung</a>
+            {% endif %}
+
+            <div class="nav-section">Konto</div>
+            
+            {% if user.role == 'user' %}
+                <a href="{% url 'vip_werden' %}" class="nav-item">VIP werden</a>
+            {% endif %}
+            
+            {% if user.role == 'vip' %}
+                <a href="{% url 'administrator_werden' %}" class="nav-item">Administrator werden</a>
+            {% endif %}
+            
+            <a href="{% url 'profil' %}" class="nav-item">Profil</a>
+        </nav>
+        
+        <div class="benutzer-section">
+            <div class="benutzer-info">
+                <div class="benutzer-avatar">{{ user.initials }}</div>
+                <div class="benutzer-details">
+                    <div class="benutzer-name">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="benutzer-role">
+                        {% if user.role == 'admin' %}Administrator
+                        {% elif user.role == 'vip' %}VIP Anwender
+                        {% else %}Einfacher Anwender{% endif %}
+                    </div>
+                </div>
+            </div>
+            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+        </div>
+    </div>
+ 
+    <main class="hauptinhalt">
+        <div class="header">
+            <h1>Willkommen zurück!</h1>
+            <p>Hier ist Ihre Zeiterfassungsübersicht</p>
+        </div>
+     
+<div class="berichte-container">
+  <h2 class="berichte-titel">Meine Berichte</h2>
+  
+  <div class="berichte-liste">
+    {% if berichte %}
+      {% for bericht in berichte %}
+        <div class="bericht-karte">
+          <div class="bericht-kopf">
+            <div>
+              <div class="bericht-datum">{{ bericht.datum_formatiert }}</div>
+              <div class="bericht-zeit">{{ bericht.stunden }}h {{ bericht.minuten }}min</div>
+            </div>
+            <div class="bericht-actions">
+              <a href="{% url 'bericht_bearbeiten' forloop.counter0 %}" class="button-ghost">Bearbeiten</a>
+              <a href="{% url 'bericht_loeschen' forloop.counter0 %}" class="button-danger" onclick="return confirm('Wirklich loeschen?')">Loeschen</a>
+            </div>
+          </div>
+          <h3 class="bericht-titel">{{ bericht.modul|title }}</h3>
+          <p class="bericht-text">{{ bericht.beschreibung }}</p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>Noch keine Berichte vorhanden. Erstellen Sie Ihren ersten Bericht!</p>
+    {% endif %}
+  </div>
+    </main>
+
+</body>
+</html>
+   
+ 
+ 

@@ -1,0 +1,134 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>VIP-Datenmanagemnt</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'neuer_bericht' %}" class="nav-item">Neuer Bericht</a>
+            <a href="{% url 'zeituebersicht' %}" class="nav-item">Zeitübersicht</a>
+            
+            {% if user.role == 'vip' %}
+                <div class="nav-section">VIP</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+            {% endif %}
+            
+            {% if user.role == 'admin' %}
+                <div class="nav-section">Administration</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+                <a href="{% url 'admin_benutzerverwaltung' %}" class="nav-item">Benutzerverwaltung</a>
+                <a href="{% url 'admin_antraege' %}" class="nav-item">Anträge</a>
+                <a href="{% url 'admin_modulverwaltung' %}" class="nav-item">Modulverwaltung</a>
+            {% endif %}
+            
+            <div class="nav-section">Konto</div>
+            
+            {% if user.role == 'user' %}
+                <a href="{% url 'vip_werden' %}" class="nav-item">VIP werden</a>
+            {% endif %}
+            
+            {% if user.role == 'vip' %}
+                <a href="{% url 'administrator_werden' %}" class="nav-item">Administrator werden</a>
+            {% endif %}
+            
+            <a href="{% url 'profil' %}" class="nav-item">Profil</a>
+        </nav>
+        
+        <div class="benutzer-section">
+            <div class="benutzer-info">
+                <div class="benutzer-avatar">{{ user.initials }}</div>
+                <div class="benutzer-details">
+                    <div class="benutzer-name">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="benutzer-role">
+                        {% if user.role == 'admin' %}Administrator
+                        {% elif user.role == 'vip' %}VIP Anwender
+                        {% else %}Einfacher Anwender{% endif %}
+                    </div>
+                </div>
+            </div>
+            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+        </div>
+    </div>
+
+ <main class="hauptinhalt">
+    <div class="header">
+        <h1>Datenmanagement</h1>
+        <p>Exportieren und importieren Sie Ihre Zeiterfassungsdaten</p>
+    </div>
+
+    <div class="inhalt-gitter-VIPD">
+        
+      
+        <div class="funktionskarte-VIPD">
+            <h3>Daten exportieren</h3>
+            <p class="funktions-beschreibung-VIPD">
+                Laden Sie alle Ihre Arbeitsberichte in einem maschinenlesbaren Format herunter.
+            </p>
+
+            <div class="format-auswahl-VIPD">
+                <a href="{% url 'export_json' %}" class="button-haupt-VIPD" style="display: inline-block; margin: 0.5rem;">
+                     Als JSON exportieren
+                </a>
+                <a href="{% url 'export_csv' %}" class="button-haupt-VIPD" style="display: inline-block; margin: 0.5rem;">
+                     Als CSV exportieren
+                </a>
+                <a href="{% url 'export_xml' %}" class="button-haupt-VIPD" style="display: inline-block; margin: 0.5rem;">
+                     Als XML exportieren
+                </a>
+            </div>
+        </div>
+
+    
+        <div class="funktionskarte-VIPD">
+            <h3>Daten importieren</h3>
+            <p class="funktions-beschreibung-VIPD">
+                Laden Sie eine Datei mit Ihren Arbeitsberichten hoch, um die Online-Daten zu überschreiben.
+            </p>
+
+            <div class="warnbox-VIPD">
+                <strong> Achtung!</strong>
+                Das Importieren überschreibt alle vorhandenen Daten. Diese Aktion kann nicht rückgängig gemacht werden.
+            </div>
+
+            <form method="POST" action="{% url 'import_berichte' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div style="margin: 1.5rem 0;">
+                    <label for="file-upload" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        Datei auswählen:
+                    </label>
+                    <input type="file" 
+                           id="file-upload" 
+                           name="file" 
+                           accept=".json,.csv" 
+                           required 
+                           style="display: block; padding: 0.75rem; width: 100%; border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc;">
+                    <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
+                        Unterstützte Formate: JSON und CSV
+                    </p>
+                </div>
+
+                <button type="submit" 
+                        class="button-haupt-VIPD" 
+                        onclick="return confirm('ACHTUNG: Dies überschreibt alle Ihre vorhandenen Berichte! Möchten Sie fortfahren?')">
+                     Daten importieren
+                </button>
+            </form>
+        </div>
+    </div>
+</main>
+ 
+    
+</body>
+</html>

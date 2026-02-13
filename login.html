@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartZeit - Login</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+            </div>
+            <p class="untertitel">Ihre Zeiterfassung in der Cloud</p>
+        </div>
+        
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-gruppe">
+                <label for="email">E-Mail-Adresse</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    value="{{ last_email }}"
+                    required
+                >
+            </div>
+            <div class="form-gruppe">
+                <label for="password">Passwort</label>
+                <input type="password" id="password" name="password" required>
+                <div class="forgot-password">
+                    <a href="#">Passwort vergessen?</a>
+                </div>
+            </div>
+            <button type="submit" class="anmelden">Anmelden</button>
+        </form>
+        <div class="oder">oder</div>
+        <div class="register-link">
+            Noch kein Konto? <a href="{% url 'registrieren' %}">Jetzt registrieren</a>
+        </div>
+    </div>
+    
+    {% if erster_besuch %}
+    <div class="cookie-hinweis" id="cookieHinweis">
+        <div class="cookie-hinweis-content">
+            <div class="cookie-hinweis-text">
+                <p>
+                    <strong>Hinweis zu Cookies:</strong> Diese Website verwendet technisch notwendige Cookies, 
+                    um Ihnen ein besseres Nutzungserlebnis zu bieten (z.B. Vorausfüllen Ihrer E-Mail beim Login).
+                </p>
+            </div>
+            <div class="cookie-hinweis-buttons">
+                <button class="cookie-btn cookie-btn-accept" onclick="akzeptiereCookies()">
+                    Verstanden
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <script>
+        {% if erster_besuch %}
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('cookieHinweis').classList.add('show');
+            }, 500);
+        });
+        {% endif %}
+        
+        function akzeptiereCookies() {
+            const hinweis = document.getElementById('cookieHinweis');
+            hinweis.style.animation = 'slideDown 0.5s ease-out';
+            
+            setTimeout(function() {
+                hinweis.style.display = 'none';
+            }, 500);
+            
+            fetch('{% url "cookie_hinweis_akzeptieren" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+        }
+    </script>
+</body>
+</html>

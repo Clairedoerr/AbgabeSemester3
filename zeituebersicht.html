@@ -1,0 +1,118 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Zeitübersicht</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'neuer_bericht' %}" class="nav-item">Neuer Bericht</a>
+            <a href="{% url 'zeituebersicht' %}" class="nav-item">Zeitübersicht</a>
+            
+            {% if user.role == 'vip' %}
+                <div class="nav-section">VIP</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+            {% endif %}
+            
+            {% if user.role == 'admin' %}
+                <div class="nav-section">Administration</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+                <a href="{% url 'admin_benutzerverwaltung' %}" class="nav-item">Benutzerverwaltung</a>
+                <a href="{% url 'admin_antraege' %}" class="nav-item">Anträge</a>
+                <a href="{% url 'admin_modulverwaltung' %}" class="nav-item">Modulverwaltung</a>
+            {% endif %}
+            
+            <div class="nav-section">Konto</div>
+            
+            {% if user.role == 'user' %}
+                <a href="{% url 'vip_werden' %}" class="nav-item">VIP werden</a>
+            {% endif %}
+            
+            {% if user.role == 'vip' %}
+                <a href="{% url 'administrator_werden' %}" class="nav-item">Administrator werden</a>
+            {% endif %}
+            
+            <a href="{% url 'profil' %}" class="nav-item">Profil</a>
+        </nav>
+        
+        <div class="benutzer-section">
+            <div class="benutzer-info">
+                <div class="benutzer-avatar">{{ user.initials }}</div>
+                <div class="benutzer-details">
+                    <div class="benutzer-name">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="benutzer-role">
+                        {% if user.role == 'admin' %}Administrator
+                        {% elif user.role == 'vip' %}VIP Anwender
+                        {% else %}Einfacher Anwender{% endif %}
+                    </div>
+                </div>
+            </div>
+            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+        </div>
+    </div>
+
+   <main class="hauptinhalt">
+    <div class="header">
+        <div class="header-left">
+            <h1>Zeitübersicht</h1>
+        </div>
+        <button class="button-ausdrucken" onclick="window.print()" style="float: right;">Als PDF drucken</button>
+    </div>
+        <div class="gesamtabschnitt">
+            <h2 class="gesamt-titel">Gesamtübersicht</h2>
+            
+            <div class="gesamtzeit-karte">
+                <div class="gesamtzeit-label">Gesamtarbeitszeit</div>
+                <div class="gesamtzeit-wert">{{ gesamt_minuten }}</div>
+                <div class="gesamtzeit-einheit">Minuten</div>
+                <div class="gesamtzeit-umgerechnet">{{ gesamt_text }}</div>
+            </div>
+
+            <div class="modul-aufteilung">
+                <h3 class="aufteilung-titel">Zeitverteilung nach Modulen</h3>
+
+                {% if modul_liste %}
+                    {% for modul in modul_liste %}
+                    <div class="modul-element">
+                        <div class="modul-kopf">
+                            <div class="modul-name">{{ modul.name }}</div>
+                            <div class="modul-prozent">{{ modul.prozent|floatformat:0 }}%</div>
+                        </div>
+                        <div class="modul-statistik">
+                            <div class="stat-box">
+                                <div class="stat-label">Zeit</div>
+                                <div class="stat-wert">{{ modul.zeit_text }}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Umgerechnet</div>
+                                <div class="stat-wert">{{ modul.umgerechnet }}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Anteil</div>
+                                <div class="stat-wert">{{ modul.anteil }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Noch keine Berichte vorhanden. Erstellen Sie Ihren ersten Bericht!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+ 
+</main>
+
+
+</body>
+</html>

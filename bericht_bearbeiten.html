@@ -1,0 +1,119 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Bericht bearbeiten</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="SmartZeit Logo" class="logo-image">
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'neuer_bericht' %}" class="nav-item">Neuer Bericht</a>
+            <a href="{% url 'zeituebersicht' %}" class="nav-item">Zeitübersicht</a>
+
+            {% if user.role == 'vip' %}
+                <div class="nav-section">VIP</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+            {% endif %}
+
+            {% if user.role == 'admin' %}
+                <div class="nav-section">Administration</div>
+                <a href="{% url 'vip_datenmanagement' %}" class="nav-item">Datenmanagement</a>
+                <a href="{% url 'admin_benutzerverwaltung' %}" class="nav-item">Benutzerverwaltung</a>
+                <a href="{% url 'admin_antraege' %}" class="nav-item">Anträge</a>
+                <a href="{% url 'admin_modulverwaltung' %}" class="nav-item">Modulverwaltung</a>
+            {% endif %}
+            
+            <div class="nav-section">Konto</div>
+            
+            {% if user.role == 'user' %}
+                <a href="{% url 'vip_werden' %}" class="nav-item">VIP werden</a>
+            {% endif %}
+            
+            {% if user.role == 'vip' %}
+                <a href="{% url 'administrator_werden' %}" class="nav-item">Administrator werden</a>
+            {% endif %}
+            
+            <a href="{% url 'profil' %}" class="nav-item">Profil</a>
+        </nav>
+        
+        <div class="benutzer-section">
+            <div class="benutzer-info">
+                <div class="benutzer-avatar">{{ user.initials }}</div>
+                <div class="benutzer-details">
+                    <div class="benutzer-name">{{ user.firstname }} {{ user.lastname }}</div>
+                    <div class="benutzer-role">
+                        {% if user.role == 'admin' %}Administrator
+                        {% elif user.role == 'vip' %}VIP Anwender
+                        {% else %}Einfacher Anwender{% endif %}
+                    </div>
+                </div>
+            </div>
+            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+        </div>
+    </div>
+
+    <main class="hauptinhalt">
+        <div class="header">
+            <h1>Arbeitsbericht bearbeiten</h1>
+            <p>Aendern Sie Ihre Zeiterfassung</p>
+        </div>
+
+        <form method="POST" action="{% url 'bericht_bearbeiten' index %}" class="formularbereich-neuerBericht">
+            {% csrf_token %}
+            
+            <div class="formulargruppe-neuerBericht">
+                <label for="datum">Datum <span class="erforderlich-neuerBericht">*</span></label>
+                <input type="date" id="datum" name="datum" value="{{ bericht.datum }}" required>
+                <p class="eingabehinweis-neuerBericht">An welchem Tag wurde die Arbeit verrichtet?</p>
+            </div>
+
+            <div class="formulargruppe-neuerBericht">
+                <label>Arbeitszeit <span class="erforderlich-neuerBericht">*</span></label>
+                <div class="zeit-eingabegruppe">
+                    <div>
+                        <input type="number" id="stunden" name="stunden" min="0" max="23" placeholder="Stunden" value="{{ bericht.stunden }}" required>
+                    </div>
+                    <div>
+                        <input type="number" id="minuten" name="minuten" min="0" max="59" placeholder="Minuten" value="{{ bericht.minuten }}" required>
+                    </div>
+                </div>
+                <p class="eingabehinweis-neuerBericht">Wie viele Stunden und Minuten wurde gearbeitet?</p>
+            </div>
+
+            <div class="formulargruppe-neuerBericht">
+                <label for="modul">Modul <span class="erforderlich-neuerBericht">*</span></label>
+                <select id="modul" name="modul" required>
+                    <option value="">Bitte wählen...</option>
+                    {% for modul in module %}
+                    <option value="{{ modul.name }}" {% if bericht.modul == modul.name %}selected{% endif %}>
+                        {{ modul.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <p class="eingabehinweis-neuerBericht">Für welches Modul wurde gearbeitet?</p>
+            </div>
+
+            <div class="formulargruppe-neuerBericht">
+                <label for="beschreibung">Beschreibung <span class="erforderlich-neuerBericht">*</span></label>
+                <textarea id="beschreibung" name="beschreibung" required placeholder="Beschreiben Sie kurz die getane Arbeit...">{{ bericht.beschreibung }}</textarea>
+                <p class="eingabehinweis-neuerBericht">Kurzer Bericht ueber den Inhalt der getanen Arbeit</p>
+            </div>
+
+            <div class="formularaktionen-neuerBericht">
+                <button type="submit" class="button-primaer-neuerBericht">Änderungen speichern</button>
+                <a href="{% url 'dashboard' %}" class="button-sekundär-neuerBericht">Abbrechen</a>
+            </div>
+        </form>
+    </main>
+
+</body>
+</html>
