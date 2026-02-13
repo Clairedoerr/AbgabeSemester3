@@ -57,7 +57,12 @@
                     </div>
                 </div>
             </div>
-            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="button-logout">
+                    Abmelden
+                </button>
+            </form>
         </div>
     </div>
 
@@ -109,8 +114,20 @@
                         </div>
                         
                         <div class="request-actions">
-                            <button class="btn-approve" onclick="window.location.href='{% url 'antrag_genehmigen' antrag.username %}'">Genehmigen</button>
-                            <button class="btn-reject" onclick="window.location.href='{% url 'antrag_ablehnen' antrag.username %}'">Ablehnen</button>
+
+                            <form action="{% url 'antrag_genehmigen' antrag.username %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-approve">
+                                    Genehmigen
+                                </button>
+                            </form>
+
+                            <form action="{% url 'antrag_ablehnen' antrag.username %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-reject">
+                                    Ablehnen
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

@@ -57,7 +57,9 @@
                     </div>
                 </div>
             </div>
-            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+            <a href="{% url 'logout' %}" class="button-logout">
+                Abmelden
+            </a>
         </div>
     </div>
 

@@ -7,15 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartZeit - Modulverwaltung</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
-
-    <script>
-    function loescheModul(modulId, modulName) {
-        if (confirm('Modul "' + modulName + '" wirklich löschen?')) {
-            window.location.href = '/modul_loeschen/' + modulId + '/';
-        }
-    }
-    </script>
-
 </head>
 <body>
 
@@ -67,7 +58,12 @@
                     </div>
                 </div>
             </div>
-            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="button-logout">
+                    Abmelden
+                </button>
+            </form>
         </div>
     </div>
 
@@ -133,11 +129,20 @@
                             {% endif %}
                         </td>
                         <td style="padding: 15px; text-align: center;">
-                            <button 
-                                onclick="loescheModul('{{ modul.id }}', '{{ modul.name }}')"
-                                style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px;">
-                                Löschen
-                            </button>
+                            <form action="{% url 'modul_loeschen' modul.id %}"
+                                  method="post"
+                                  onsubmit="return confirm('Modul {{ modul.name }} wirklich löschen?');"
+                                  style="display:inline;">
+
+                                {% csrf_token %}
+
+                                <button type="submit"
+                                        style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                    Löschen
+                                </button>
+
+                            </form>
+
                         </td>
                     </tr>
                     {% endfor %}

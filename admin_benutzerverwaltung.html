@@ -7,14 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartZeit - Benutzerverwaltung</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles/style.css' %}">
-    
-    <script>
-    function loescheBenutzer(username, name) {
-        if (confirm('Benutzer "' + name + '" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) {
-            window.location.href = '/benutzer_loeschen/' + username + '/';
-        }
-    }
-    </script>
+
 </head>
 <body>
     <div class="sidebar">
@@ -65,7 +58,12 @@
                     </div>
                 </div>
             </div>
-            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="button-logout">
+                    Abmelden
+                </button>
+            </form>
         </div>
     </div>
 
@@ -134,11 +132,16 @@
                     <td>{{ benutzer.created_at }}</td>
                     <td>
                         <div class="action-buttons">
-                            <button 
-                                class="btn-action btn-block" 
-                                onclick="loescheBenutzer('{{ benutzer.username }}', '{{ benutzer.firstname }} {{ benutzer.lastname }}')">
+                            <form action="{% url 'benutzer_loeschen' benutzer.username %}"
+                              method="post"
+                              onsubmit="return confirm('Benutzer {{ benutzer.firstname }} {{ benutzer.lastname }} wirklich löschen?');"
+                              style="display:inline;">
+
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-block">
                                 Löschen
                             </button>
+                        </form>
                         </div>
                     </td>
                 </tr>

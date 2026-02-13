@@ -56,7 +56,13 @@
                     </div>
                 </div>
             </div>
-            <button class="button-logout" onclick="window.location.href='{% url 'login' %}'">Abmelden</button>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="button-logout">
+                    Abmelden
+                </button>
+            </form>
+
         </div>
     </div>
 
